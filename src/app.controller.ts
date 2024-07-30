@@ -165,12 +165,16 @@ export class AppController {
 
    }
 
-   @Post('/tranfer')
-   tranfer(@Body() tranferFormDto: TransferFormDto, @Req() req: Request, @Res() res: Response) {
-
+   @Post('transfer')
+   tranfer(
+      @Body() tranferFormDto: TransferFormDto,
+      @Req() req: Request,
+      @Res() res: Response,
+   ) {
       const ammountToTransfer = +tranferFormDto.amount;
 
-      if (isNaN(ammountToTransfer) || ammountToTransfer <= 0) throw new UnauthorizedException('Invalid ammount');
+      if (isNaN(ammountToTransfer) || ammountToTransfer <= 0)
+         throw new UnauthorizedException('Invalid ammount');
 
       const fromUser = AppManager.getUserSessionId(req.cookies.sessionId);
       const toUser = AppManager.getUser(tranferFormDto.username);
@@ -183,7 +187,7 @@ export class AppController {
 
       fromUser.balance -= ammountToTransfer;
       toUser.balance += ammountToTransfer;
-
+      res.redirect('/');
    }
 
 
