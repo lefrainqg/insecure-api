@@ -27,7 +27,7 @@ class AppManager {
 
    static users: User[] = [
       { username: 'alex', password: '0000', balance: 300 },
-      { username: 'katy', password: '1111', balance: 300 }
+      { username: 'katty', password: '1111', balance: 300 }
    ];
 
    static sessions: Session[] = [];
@@ -43,24 +43,20 @@ class AppManager {
 
 
    static createUserSesion = (username: string) => {
-
       const sessionId: string = `${new Date().getTime()}${Math.random()}`;
       const newSession: Session = { sessionId, username };
-
       AppManager.sessions.push(newSession);
-
       fs.writeFileSync('/sessions.json', JSON.stringify(AppManager.sessions));
-
       return sessionId;
    }
 
-   static getUserSessionId = (sessionId: string | null) => {
-      console.log('getUserSessionId');
+   static getUserfromSessionId(sessionId: string) {
       if (!sessionId) return null;
-      const session = AppManager.sessions.find(session => session.sessionId === sessionId);
-      if (!session) return null
-      const user = AppManager.users.find(user => user.username === session.username);
-      return user ? user : null;
+      const session = AppManager.sessions.find((session) => session.sessionId == sessionId);
+      if (!session) return null;
+      const user = AppManager.users.find((user) => user.username == session.username);
+      if (!user) return null;
+      return user;
    }
 
    static removeSession = (sessionId: string | null) => {
@@ -127,7 +123,7 @@ export class AppController {
    @Get()
    home(@Req() req: Request): string {
       console.log("At Home");
-      const user = AppManager.getUserSessionId(req.cookies.sessionId);
+      const user = AppManager.getUserfromSessionId(req.cookies.sessionId);
       if (user) {
          return homePage.replace('{{username}}', user.username).replace('{{balance}}', user.balance.toFixed(2));
       }
@@ -176,8 +172,12 @@ export class AppController {
       if (isNaN(ammountToTransfer) || ammountToTransfer <= 0)
          throw new UnauthorizedException('Invalid ammount');
 
-      const fromUser = AppManager.getUserSessionId(req.cookies.sessionId);
+      const fromUser = AppManager.getUserfromSessionId(req.cookies.sessionId);
       const toUser = AppManager.getUser(tranferFormDto.username);
+
+
+      console.log(fromUser, toUser);
+
 
       if (!fromUser || !toUser) throw new UnauthorizedException('User not found');
 
